@@ -63,8 +63,8 @@ Avant de commencer cette formation, vous devez avoir :
 
 ## 📂 Organisation du projet
 
-
 - `/requetes` : dossiers contenant les requêtes SQL.  
+- `Structure.md` : structure de la base AdventureWorks
 - `README.md` : ce fichier.
 
 
