@@ -1,4 +1,4 @@
-/* Créer une vue qui contient les informations sur les clients personne morale */
+/* CrÃ©er une vue qui contient les informations sur les clients personne morale */
 
 CREATE VIEW Person.vClientsEntreprises AS 
 	SELECT DISTINCT
@@ -21,7 +21,7 @@ CREATE VIEW Person.vClientsEntreprises AS
 			ON sp.CountryRegionCode = cr.CountryRegionCode
 	WHERE bea.AddressTypeID = 3;
 
-/* Créer une vue qui contient les informations sur les clients personne physique */
+/* CrÃ©er une vue qui contient les informations sur les clients personne physique */
 CREATE VIEW Person.vCLientsIndividus AS 
 	SELECT 
 		c.PersonID ,
@@ -55,7 +55,7 @@ CREATE VIEW Person.vCLientsIndividus AS
 	WHERE p.PersonType = 'IN'
 		AND bea.AddressTypeID = 2;
 
-/* Créer une vue qui contient les informations de localisation des personnes */
+/* CrÃ©er une vue qui contient les informations de localisation des personnes */
 CREATE VIEW Person.vAddress AS 
 	SELECT 
 		a.AddressID,
