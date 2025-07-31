@@ -47,6 +47,28 @@ CREATE VIEW Person.vCustomers AS
 			ON c.PersonID = pp.BusinessEntityID
 	WHERE bea.AddressTypeID IN (2,3);
 
-
+-- Créer une vue vManagement qui contient des informations sur les managers et leurs employés
+CREATE VIEW HumanResources.vManagement AS 
+	SELECT 
+		e1.BusinessEntityID AS ManagerID,
+		CONCAT_WS(' ', p.FirstName, p.MiddleName, p.LastName) AS Manager,
+		e1.JobTitle AS JobTitleManager,
+		e2.BusinessEntityID AS SubordinateID,
+		CONCAT_WS(' ', p2.FirstName, p2.MiddleName, p2.LastName) AS Subordinate,
+		e2.JobTitle AS JobTitleSubordinate,
+		d.Name AS Department,
+		d.GroupName
+	FROM HumanResources.Employee e1
+		LEFT JOIN Person.Person p
+			ON e1.BusinessEntityID = p.BusinessEntityID
+		JOIN HumanResources.Employee e2
+			ON e2.OrganizationNode.GetAncestor(1) = e1.OrganizationNode
+		LEFT JOIN Person.Person p2
+			ON e2.BusinessEntityID = p2.BusinessEntityID
+		LEFT JOIN HumanResources.EmployeeDepartmentHistory edh
+			ON e1.BusinessEntityID = edh.BusinessEntityID
+		LEFT JOIN HumanResources.Department d
+			ON edh.DepartmentID = d.DepartmentID
+	WHERE edh.EndDate IS NULL;
 
 
