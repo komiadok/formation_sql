@@ -3,84 +3,83 @@ GO
 
 /* EXERCICES - Exploration de base (niveau débutant) */
 
--- Afficher les types d'adresse d'une personne dans la base
-SELECT DISTINCT AddressTypeID, Name FROM Person.AddressType;
+/* Clients */
 
--- Afficher les rôles ou types d'entité des personnes dans la base
-SELECT DISTINCT PersonType FROM Person.Person;
-
--- Calculer le nombre total de relations clients dans la base
-SELECT COUNT(*) AS TotalRealtionsClient FROM Sales.Customer;
+-- Lister les clients dans la base
+SELECT * FROM Sales.Customer;
 -- 19 820
 
--- Calculer le nombre de clients qui ne sont des personnes morales
-SELECT COUNT(DISTINCT PersonID) AS ClientsNonEntreprises FROM Sales.Customer WHERE PersonID IS NOT NULL;
--- 19 119
-
--- Calculer le nombre de clients qui sont des personnes morales
-SELECT COUNT(DISTINCT StoreID) AS ClientsEntreprises FROM Sales.Customer WHERE StoreID IS NOT NULL;
--- 701
-
--- Calculer le nombre de clients qui sont des personnes physiques
-SELECT COUNT(DISTINCT c.PersonID) AS ClientsIndividus
-FROM Sales.Customer c
-	JOIN Person.Person p 
-		ON c.PersonID = p.BusinessEntityID
-WHERE p.PersonType = 'IN';
+-- Lister les clients individuels (B2C)
+SELECT * FROM Sales.Customer WHERE PersonID IS NOT NULL AND StoreID IS NULL;
 -- 18 484
 
--- Afficher les 10 premiers clients de la vue vClientsIndividus
-SELECT TOP 10* FROM Person.vCLientsIndividus;
+-- Lister les clients qui sont des personnes morales (B2B)
+SELECT * FROM Sales.Customer WHERE PersonID IS NULL AND StoreID IS NOT NULL;
+-- 701
 
--- Afficher les 10 premières entreprises clientes dans la vie vClientsEntreprises
-SELECT TOP 10* FROM Person.vClientsEntreprises;
+-- Lister les clients individuels (propriétaires) qui sont associés à une organisation (B2B)
+SELECT * FROM Sales.Customer WHERE PersonID IS NOT NULL AND StoreID IS NOT NULL;
+-- 635
 
--- Calculer le nombre de produits distincts vendus
-SELECT COUNT(ProductID) AS TotalProducts FROM Production.Product;
+/* Produits */
+
+-- Lister les produits vendus
+SELECT * FROM Production.Product;
 -- 504
 
--- Lister les produits par nom, numéro et prix standard
+-- Lister les produits par nom, numéro, prix standard et prix de vente
 SELECT 
-	ProductNumber,
 	Name,
-	StandardCost
+	ProductNumber,
+	StandardCost,
+	ListPrice
 FROM Production.Product;
 
--- Lister les catégories de produits et leurs sous-catégories
-SELECT
-	pc.Name AS Category,
-	ps.Name AS Subcategory
-FROM Production.ProductCategory pc
-	JOIN Production.ProductSubcategory ps
-		ON pc.ProductCategoryID = ps.ProductCategoryID
-ORDER BY pc.Name, ps.Name;
-
--- Lister les produits de la catégorie Bikes
+-- Afficher les produits sans prix de vente
 SELECT 
-	p.Name AS Product,
-	pc.Name AS Category
-FROM Production.Product p 
-	LEFT JOIN Production.ProductSubcategory ps
-		ON p.ProductSubcategoryID = ps.ProductSubcategoryID
-	LEFT JOIN Production.ProductCategory pc
-		ON ps.ProductCategoryID = pc.ProductCategoryID
-WHERE pc.Name = 'Bikes'
-ORDER BY p.Name;
+	Name,
+	ProductNumber,
+	StandardCost,
+	ListPrice
+FROM Production.Product
+WHERE ListPrice = 0;
 
--- Trouver les 10 produits les plus chers
+-- Lister les produits actifs (encore vendus)
+SELECT 
+	Name,
+	ProductNumber,
+	StandardCost,
+	ListPrice
+FROM Production.Product
+WHERE SellEndDate IS NULL;
+
+-- Trouver les 10 produits actifs les plus chers
 SELECT TOP 10
-	Name AS Product,
+	Name,
+	ProductNumber,
+	StandardCost,
 	ListPrice
 FROM Production.Product 
+WHERE SellEndDate IS NULL
+	AND ListPrice > 0
 ORDER BY ListPrice DESC;
 
--- Calculer le nombre de commandes passées par les clients 
-SELECT COUNT(*) AS TotalSales FROM Sales.SalesOrderHeader;
+-- Afficher les catégories de produits
+SELECT * FROM Production.ProductCategory;
+-- 4
+
+-- Afficher les sous-catégories de produits et leurs catégories
+SELECT * FROM Production.ProductSubcategory;
+-- 37
+
+/* Les commandes  */
+
+-- Lister toutes les commandes 
+SELECT * FROM Sales.SalesOrderHeader;
 -- 31 465
 
--- Calculer le chiffre d'affaires réalisé 
-SELECT SUM(TotalDue) AS CA FROM Sales.SalesOrderHeader;
--- 123 216 786.1159 $
+-- Lister les détails de la commande 43659
+SELECT * FROM Sales.SalesOrderDetail WHERE SalesOrderID = 43659;
 
 -- Trouver les 5 dernières commandes passées par des clients
 SELECT TOP 5
@@ -102,43 +101,12 @@ SELECT
 FROM Sales.SalesOrderHeader
 WHERE CustomerID = 30107;
 
--- Calculer le nombre d'adresses différentes dans la base
-SELECT COUNT(DISTINCT AddressID) AS TotalAdresses FROM Person.Address;
--- 19 614
-
--- Afficher les 10 premières adresses avec ville, état et pays
-SELECT TOP 10* FROM Person.vAddress;
-
--- Calculer le nombre d'employés dans la base
-SELECT COUNT(BusinessEntityID) AS TotalEmployee FROM HumanResources.Employee;
+/* Les employés */
+-- Lister les employés dans la base
+SELECT * FROM HumanResources.Employee;
 -- 290
 
--- Lister les employés et leur département
-SELECT 
-	e.NationalIDNumber,
-	e.JobTitle,
-	e.BirthDate,
-	e.MaritalStatus,
-	e.Gender,
-	e.HireDate,
-	d.Name AS Department
-FROM HumanResources.Employee e 
-	JOIN HumanResources.EmployeeDepartmentHistory edh 
-		ON e.BusinessEntityID = edh.BusinessEntityID
-	JOIN HumanResources.Department d
-		ON edh.DepartmentID = d.DepartmentID
-WHERE edh.EndDate IS NULL
-ORDER BY e.NationalIDNumber;
-
--- Lister les vendeurs actifs avec leur nom et leur territoire
-SELECT 
-	p.FirstName,
-	p.MiddleName,
-	p.LastName,
-	st.Name AS Territory
-FROM Sales.SalesPerson sp 
-	JOIN Sales.SalesTerritory st
-		ON sp.TerritoryID = st.TerritoryID
-	JOIN Person.Person p 
-		ON sp.BusinessEntityID = p.BusinessEntityID
-WHERE sp.SalesQuota IS NOT NULL;
+/* Localisation */
+-- Identifier toutes les adresses dans la base
+SELECT * FROM Person.Address;
+-- 19 614
