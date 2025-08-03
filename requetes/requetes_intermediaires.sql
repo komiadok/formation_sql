@@ -1,11 +1,11 @@
 USE AdventureWorks2022;
 GO
 
-/* EXERCICES - RequÃªtes intermÃ©diaires */
+/* EXERCICES - Requêtes intermédiaires et avancées */
 
 /* Jointures simples et multiples */
 
--- Afficher les produits avec leurs modÃ¨les
+-- Afficher les produits avec leurs modèles
 SELECT 
 	p.Name AS Product,
 	pm.Name AS Model
@@ -14,7 +14,7 @@ FROM Production.Product p
 		ON p.ProductModelID = pm.ProductModelID
 ORDER BY p.Name, pm.Name;
 
--- Pour chaque produit, afficher son modÃ¨le et sa description
+-- Pour chaque produit, afficher son modèle et sa description
 SELECT 
 	p.Name AS Product,
 	pm.Name AS Model,
@@ -32,7 +32,7 @@ WHERE pmpdc.CultureID IS NULL
 ORDER BY p.Name, pm.Name, pd.Description;
 
 
--- Afficher les produits, avec les sous-catÃ©gories et catÃ©gories auxquelles ils appartiennent
+-- Afficher les produits, avec les sous-catégories et catégories auxquelles ils appartiennent
 SELECT
 	p.Name AS Product,
 	ps.Name AS Subcategory,
@@ -44,7 +44,7 @@ FROM Production.Product p
 		ON ps.ProductCategoryID = pc.ProductCategoryID
 ORDER BY p.Name, ps.Name, pc.Name;
 
--- Afficher les produits, les quantitÃ©s disponibles en stock, le stock de sÃ©curitÃ© et leur entrepÃ´t de stockage
+-- Afficher les produits, les quantités disponibles en stock, le stock de sécurité et leur entrepôt de stockage
 SELECT 
 	p.Name AS Product,
 	pi.Quantity AS Stock,
@@ -58,7 +58,7 @@ FROM Production.Product p
 WHERE p.SellEndDate IS NULL
 ORDER BY p.Name, l.Name;
 
--- Afficher les produits assemblÃ©s et leurs composants
+-- Afficher les produits assemblés et leurs composants
 SELECT
 	bom.ProductAssemblyID,
 	p.Name AS ProductAssemblyName,
@@ -93,7 +93,7 @@ FROM Sales.Customer c
 		ON c.StoreID = s.BusinessEntityID
 ORDER BY c.CustomerID, p.BusinessEntityID, s.BusinessEntityID;
 
--- Lister les clients avec commandes associÃ©es
+-- Lister les clients avec commandes associées
 SELECT 
 	c.CustomerID,
 	c.Customer,
@@ -107,7 +107,7 @@ FROM Person.vCustomers c
 	LEFT JOIN Sales.SalesOrderHeader soh
 		ON c.CustomerID = soh.CustomerID;
 
--- Lister les employÃ©s avec leur nom et dÃ©partement
+-- Lister les employés avec leur nom et département
 SELECT 
 	e.BusinessEntityID,
 	e.Gender,
@@ -125,7 +125,7 @@ FROM HumanResources.Employee e
 		ON edh.DepartmentID = d.DepartmentID
 WHERE edh.EndDate IS NULL;
 
--- Lister les managers et leurs employÃ©s, ainsi que leurs dÃ©partements
+-- Lister les managers et leurs employés, ainsi que leurs départements
 SELECT 
 	e1.BusinessEntityID AS ManagerID,
 	CONCAT_WS(' ', p.FirstName, p.MiddleName, p.LastName) AS Manager,
@@ -148,7 +148,7 @@ FROM HumanResources.Employee e1
 		ON edh.DepartmentID = d.DepartmentID
 WHERE edh.EndDate IS NULL
 ORDER BY e1.BusinessEntityID;
--- Get Ancestor(1) retourne le niveau supÃ©rieur direct de l'employÃ©
+-- Get Ancestor(1) retourne le niveau supérieur direct de l'employé
 
 -- Afficher l'historique de poste
 SELECT 
@@ -190,7 +190,7 @@ FROM Sales.SalesPerson sp
 		ON sp.BusinessEntityID = m.SubordinateID
 WHERE sp.SalesQuota IS NOT NULL;
 
--- Associer Ã  chaque produit son fournisseur
+-- Associer à chaque produit son fournisseur
 SELECT 
 	p.ProductID,
 	p.Name AS Product,
@@ -204,9 +204,9 @@ FROM Production.Product p
 WHERE v.ActiveFlag = 1
 ORDER BY p.ProductID, p.Name;
 
-/* AgrÃ©gations */
+/* Agrégations */
 
--- Nombre de produits par catÃ©gorie
+-- Nombre de produits par catégorie
 SELECT
 	pc.Name AS Category,
 	COUNT(p.ProductID) AS TotalProducts
@@ -228,7 +228,7 @@ FROM Sales.Customer c
 GROUP BY st.Name
 ORDER BY st.Name;
 
--- TOP 10 des clients ayant passÃ© le plus de commandes
+-- TOP 10 des clients ayant passé le plus de commandes
 SELECT TOP 10
 	c.Customer,
 	COUNT(soh.SalesOrderID) AS TotalSales
@@ -250,7 +250,7 @@ WHERE soh.CustomerID IS NOT NULL
 GROUP BY c.Customer
 ORDER BY ROUND(SUM(soh.TotalDue), 2) DESC;
 
--- RÃ©partition des clients par type de relation
+-- Répartition des clients par type de relation
 SELECT 
 	RelationType,
 	COUNT(CustomerID) AS TotalCustomers
@@ -276,7 +276,7 @@ FROM Sales.SalesOrderHeader
 GROUP BY YEAR(OrderDate),FORMAT(OrderDate, 'MMMM'), MONTH(OrderDate)
 ORDER BY YEAR(OrderDate), DATEPART(MONTH, OrderDate);
 
--- Nombre de commandes par territoire pour l'annÃ©e 2014
+-- Nombre de commandes par territoire pour l'année 2014
 SELECT 
 	st.Name AS Territory,
 	COUNT(soh.SalesOrderID) AS TotalOrders
@@ -287,7 +287,7 @@ WHERE YEAR(soh.OrderDate) = 2014
 GROUP BY st.Name
 ORDER BY COUNT(soh.SalesOrderID) DESC;
 
--- TOP 10 des produits gÃ©nÃ©rant le plus de revenus 
+-- TOP 10 des produits générant le plus de revenus 
 SELECT TOP 10
 	p.ProductID,
 	p.Name AS Product,
@@ -300,7 +300,7 @@ WHERE p.SellEndDate IS NULL
 GROUP BY p.ProductID, p.Name
 ORDER BY ROUND(SUM(sod.LineTotal), 2) ASC;
 
--- Nombre d'employÃ©s par dÃ©partement
+-- Nombre d'employés par département
 SELECT 
 	d.Name AS Department,
 	COUNT(e.BusinessEntityID) AS TotalEmployees
@@ -314,3 +314,105 @@ FROM HumanResources.Employee e
 WHERE edh.EndDate IS NULL
 GROUP BY d.Name
 ORDER BY COUNT(e.BusinessEntityID);
+
+/* Sous-requêtes */
+
+-- Lister les produits jamais commandés.
+SELECT 
+	p.ProductID,
+	p.Name AS Product,
+	p.StandardCost,
+	p.ListPrice
+FROM Production.Product p
+	LEFT JOIN Sales.SalesOrderDetail sod
+		ON p.ProductID = sod.ProductID
+WHERE p.SellEndDate IS NULL
+	AND p.ListPrice > 0
+	AND sod.ProductID IS NULL; 
+
+-- Trouver les produits dont le prix est supérieur à la moyenne (Sous-requêtes)
+SELECT 
+	ProductID,
+	Name AS Product,
+	ListPrice AS ProductPrice
+FROM Production.Product
+WHERE ListPrice > 0 
+	AND sellEndDate > 0
+	AND ListPrice > ( SELECT AVG(ListPrice)
+					  FROM Production.Product)
+ORDER BY ListPrice DESC;
+
+/* CTE et Window Functions */
+
+-- Classement des vendeurs par ventes 
+WITH Person AS (
+	SELECT 
+		BusinessEntityID,
+		CONCAT_WS(' ',FirstName, MiddleName, LastName) AS Name
+	FROM Person.Person
+)
+SELECT 
+	sp.BusinessEntityID,
+	p.Name AS SalesPerson,
+	SUM(sp.SalesYTD) AS TotalSales,
+	RANK() OVER (ORDER BY SUM(sp.SalesYTD) DESC) AS Rank
+FROM Sales.SalesPerson sp
+	LEFT JOIN Person p
+		ON sp.BusinessEntityID = p.BusinessEntityID
+GROUP BY sp.BusinessEntityID, p.Name
+ORDER BY RANK() OVER (ORDER BY SUM(sp.SalesYTD) DESC);
+
+-- Détecter les employés en doublons (personnes avec même prénom, nom et date de naissance)
+WITH duplicated_employee AS (
+	SELECT 
+		p.FirstName, 
+		p.MiddleName, 
+		p.LastName,
+		e.BirthDate,
+		COUNT(*) OVER (PARTITION BY p.FirstName, p.MiddleName, p.LastName, e.BirthDate) AS CountDuplicates
+	FROM HumanResources.Employee e
+		LEFT JOIN Person.Person p 
+			ON e.BusinessEntityID = p.BusinessEntityID
+)
+SELECT *
+FROM duplicated_employee
+WHERE CountDuplicates > 1;
+
+/* Fonctions analytiques */
+
+-- Suivre l'évolution des ventes par mois 
+SELECT 
+	YEAR(OrderDate) AS Year, 
+	MONTH(OrderDate) AS MonthNum, 
+	FORMAT(OrderDate, 'MMMM') AS Month,
+	ROUND(SUM(TotalDue), 2) AS MonthlySales,
+	LAG(ROUND(SUM(TotalDue), 2)) OVER (ORDER BY YEAR(OrderDate), MONTH(OrderDate)) AS PreviousMonthSales
+FROM Sales.SalesOrderHeader
+GROUP BY YEAR(OrderDate), MONTH(OrderDate), FORMAT(OrderDate, 'MMMM')
+ORDER BY YEAR(OrderDate), MONTH(OrderDate);
+
+-- Calculer une moyenne mobile des ventes sur 3 mois 
+WITH VentesMensuelles AS (
+    SELECT 
+        CAST(DATEFROMPARTS(YEAR(OrderDate), MONTH(OrderDate), 1) AS DATE) AS MoisDate,
+        SUM(TotalDue) AS TotalVentes
+    FROM Sales.SalesOrderHeader
+    GROUP BY YEAR(OrderDate), MONTH(OrderDate)
+),
+VentesAvecMoyenne AS (
+    SELECT 
+        MoisDate,
+        TotalVentes,
+        COUNT(*) OVER (ORDER BY MoisDate ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS FenetreTaille,
+        AVG(TotalVentes) OVER (ORDER BY MoisDate ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS MoyenneBrute
+    FROM VentesMensuelles
+)
+SELECT 
+    MoisDate,
+    TotalVentes,
+    CASE 
+        WHEN FenetreTaille < 3 THEN NULL
+        ELSE ROUND(MoyenneBrute, 2)
+    END AS MoyenneMobile3Mois
+FROM VentesAvecMoyenne
+ORDER BY MoisDate;
